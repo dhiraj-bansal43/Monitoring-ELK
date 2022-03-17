@@ -1,4 +1,3 @@
----
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
@@ -25,9 +24,14 @@ clusterDeprecationIndexing: "false"
 # Allows you to add any config files in /usr/share/elasticsearch/config/
 # such as elasticsearch.yml and log4j2.properties
 esConfig:
-        #  elasticsearch.yml: |
-        #     xpack.security.enabled: true
-        #     xpack.security.transport.ssl.enabled: true
+  elasticsearch.yml: |
+    xpack.license.self_generated.type: trial
+    xpack.security.enabled: true
+    xpack.security.transport.ssl.enabled: true
+    xpack.security.transport.ssl.verification_mode: certificate
+    xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/serverca.crt
+    xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/server.crt
+    xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/server.key
 #    key:
 #      nestedkey: value
 #  log4j2.properties: |
@@ -40,7 +44,9 @@ esJvmOptions: {}
 # Extra environment variables to append to this nodeGroup
 # This will be appended to the current 'env:' key. You can use any of the kubernetes env
 # syntax here
-extraEnvs: []
+extraEnvs:
+   - name: ELASTIC_PASSWORD
+     value: "GnoV513SAurshP2ljUFJ"
 #  - name: MY_ENVIRONMENT_VAR
 #    value: the_value_goes_here
 
@@ -54,11 +60,11 @@ envFrom: []
 # A list of secrets and their paths to mount inside the pod
 # This is useful for mounting certificates for security and for mounting
 # the X-Pack license
-secretMounts: []
-#  - name: elastic-certificates
-#    secretName: elastic-certificates
-#    path: /usr/share/elasticsearch/config/certs
-#    defaultMode: 0755
+secretMounts:
+  - name: elastic-certificates
+    secretName: my-cert
+    path: /usr/share/elasticsearch/config/certs/
+    defaultMode: 0755
 
 hostAliases: []
 #- ip: "127.0.0.1"
@@ -231,7 +237,7 @@ sysctlVmMaxMapCount: 262144
 
 readinessProbe:
   failureThreshold: 3
-  initialDelaySeconds: 10
+  initialDelaySeconds: 100
   periodSeconds: 10
   successThreshold: 3
   timeoutSeconds: 5
